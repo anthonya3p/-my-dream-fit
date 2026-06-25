@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Dream Fit</title>
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="My Dream Fit">
+<style>
+:root {
+  --bg:#0b1020; --card:#151b2e; --card2:#1f2937; --txt:#f9fafb; --muted:#a7b0c0;
+  --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --blue:#38bdf8; --line:#2d3748;
+}
+* {box-sizing:border-box}
+body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; background:linear-gradient(160deg,#060914,#111827); color:var(--txt); padding:env(safe-area-inset-top) 14px 30px; }
+header { position:sticky; top:0; z-index:5; padding:16px 0 10px; background:linear-gradient(180deg,#060914 70%,rgba(6,9,20,0)); }
+h1 {margin:0; font-size:28px; letter-spacing:-.5px}
+.subtitle {color:var(--muted); margin-top:4px; font-size:14px}
+.card {background:rgba(21,27,46,.96); border:1px solid var(--line); border-radius:20px; padding:16px; margin:12px 0; box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.row {display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.between {display:flex; justify-content:space-between; align-items:center; gap:10px}
+.score {font-size:44px; font-weight:800; letter-spacing:-1.5px}
+.progress {height:12px; background:#0f172a; border-radius:999px; overflow:hidden; border:1px solid #263044}
+.bar {height:100%; width:0%; background:linear-gradient(90deg,var(--blue),var(--ok)); transition:.25s}
+h2 {margin:0 0 10px; font-size:20px}
+h3 {margin:14px 0 8px; font-size:16px; color:#dbeafe}
+.muted {color:var(--muted); font-size:14px; line-height:1.35}
+button, .btn {border:0; border-radius:14px; padding:13px 14px; background:#263244; color:var(--txt); font-weight:700; font-size:15px}
+button.primary {background:linear-gradient(90deg,#2563eb,#0891b2)}
+button.good {background:#14532d}
+button.warn {background:#7c2d12}
+.grid {display:grid; grid-template-columns:1fr 1fr; gap:10px}
+input, textarea, select {width:100%; border:1px solid #374151; background:#0f172a; color:var(--txt); border-radius:12px; padding:12px; font-size:16px}
+textarea {min-height:80px}
+.check {display:flex; align-items:center; gap:10px; padding:12px; border:1px solid #303a4f; border-radius:14px; margin:8px 0; background:#101827}
+.check input {width:24px; height:24px}
+.exercise {border:1px solid #303a4f; border-radius:16px; padding:12px; margin:10px 0; background:#101827}
+.exercise-title {font-weight:800}
+.pill {display:inline-block; padding:6px 9px; border-radius:999px; background:#0f172a; border:1px solid #303a4f; color:#cbd5e1; font-size:12px; margin:4px 4px 0 0}
+.nav {position:fixed; bottom:0; left:0; right:0; background:#0b1020; border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(4,1fr); padding:8px 8px calc(8px + env(safe-area-inset-bottom)); z-index:20}
+.nav button {font-size:12px; padding:10px 4px; background:transparent; color:var(--muted)}
+.nav button.active {color:white; background:#1f2937}
+main {padding-bottom:78px}
+.hidden {display:none}
+.small {font-size:12px}
+.status {font-weight:700; margin:8px 0 0}
+ul {padding-left:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>My Dream Fit</h1>
+  <div class="subtitle">Anthony • Objectif 92 kg • Coach simple au quotidien</div>
+</header>
+<main>
+<section id="home">
+  <div class="card">
+    <div class="between">
+      <div>
+        <h2 id="todayTitle">Aujourd'hui</h2>
+        <div class="muted" id="todayWorkout"></div>
+      </div>
+      <div class="score"><span id="score">0</span>%</div>
+    </div>
+    <div class="progress"><div class="bar" id="scoreBar"></div></div>
+    <p class="muted" id="scoreText">Coche les bases. Pas besoin d'être parfait.</p>
+  </div>
+
+  <div class="card">
+    <h2>✅ Cases du jour</h2>
+    <label class="check"><input type="checkbox" data-check="breakfast"> Petit-déj protéiné fait</label>
+    <label class="check"><input type="checkbox" data-check="lunch"> Déjeuner simple validé</label>
+    <label class="check"><input type="checkbox" data-check="dinner"> Dîner raisonnable / photo prise</label>
+    <label class="check"><input type="checkbox" data-check="training"> Sport ou marche fait</label>
+    <label class="check"><input type="checkbox" data-check="sync"> Synchro ChatGPT préparée</label>
+  </div>
+
+  <div class="card" id="weighCard">
+    <h2>⚖️ Pesée du jour</h2>
+    <p class="muted">Pesée prévue uniquement lundi, mercredi et samedi.</p>
+    <input id="weightInput" type="number" step="0.1" placeholder="Ex : 99.4 kg">
+    <button onclick="saveWeight()" class="primary">Enregistrer le poids</button>
+    <p id="weightStatus" class="status"></p>
+  </div>
+</section>
+
+<section id="training" class="hidden">
+  <div class="card">
+    <h2>🏋️ Séance du jour</h2>
+    <div id="workoutName" class="muted"></div>
+    <div id="exerciseList"></div>
+  </div>
+</section>
+
+<section id="food" class="hidden">
+  <div class="card">
+    <h2>🍽️ Alimentation du jour</h2>
+    <h3>Petit-déjeuner</h3>
+    <ul>
+      <li>2 cafés noirs</li>
+      <li>1 shaker whey isolate</li>
+      <li>4 tranches jambon blanc OU 150-200 g skyr</li>
+    </ul>
+    <h3>Déjeuner supermarché</h3>
+    <ul>
+      <li>180-200 g poulet/dinde/jambon/thon</li>
+      <li>1 sachet riz 220 g si pratique</li>
+      <li>Salade simple : mâche, jeunes pousses, roquette, iceberg ou crudités</li>
+      <li>1 skyr nature</li>
+    </ul>
+    <p class="muted">Si pas de riz : pommes de terre vapeur, lentilles, semoule, pâtes complètes ou pain complet.</p>
+    <h3>Dîner</h3>
+    <p>Protéine + légumes + féculent raisonnable. Photo obligatoire si possible.</p>
+  </div>
+
+  <div class="card">
+    <h2>📸 Photos repas</h2>
+    <p class="muted">Prends le plat + emballage/marque/poids quand c'est possible.</p>
+    <label>Déjeuner</label>
+    <input id="lunchPhoto" type="file" accept="image/*" capture="environment">
+    <label>Dîner</label>
+    <input id="dinnerPhoto" type="file" accept="image/*" capture="environment">
+    <label>Notes rapides</label>
+    <textarea id="notes" placeholder="Ex : poké medium, sauce à part, riz 220 g entier..."></textarea>
+    <button onclick="saveNotes()">Enregistrer</button>
+  </div>
+</section>
+
+<section id="tracking" class="hidden">
+  <div class="card">
+    <h2>💧 Eau</h2>
+    <p class="muted">Objectif : 3 à 4 L. Minimum validé : 3 L.</p>
+    <div class="between"><strong><span id="waterVal">0</span> L</strong><span id="waterText" class="muted"></span></div>
+    <div class="grid">
+      <button onclick="addWater(0.25)">+250 ml</button>
+      <button onclick="addWater(0.5)">+500 ml</button>
+      <button onclick="addWater(0.75)">+750 ml</button>
+      <button onclick="addWater(1)">+1 L</button>
+    </div>
+    <button class="warn" onclick="resetWater()">Remettre à 0</button>
+  </div>
+
+  <div class="card">
+    <h2>🚶 Pas</h2>
+    <p class="muted">Minimum : 7000. Objectif ensuite : 8000-10000.</p>
+    <input id="stepsInput" type="number" placeholder="Ex : 8350">
+    <button onclick="saveSteps()" class="primary">Enregistrer les pas</button>
+    <p id="stepsStatus" class="status"></p>
+  </div>
+
+  <div class="card" id="bodyPhotoCard">
+    <h2>📷 Photos corps</h2>
+    <p class="muted">Le dimanche matin : face, profil, dos.</p>
+    <input id="bodyPhoto" type="file" accept="image/*" capture="environment" multiple>
+  </div>
+</section>
+
+<section id="sync" class="hidden">
+  <div class="card">
+    <h2>🔄 Synchroniser avec ChatGPT</h2>
+    <p class="muted">Appuie, copie le bilan, colle-le dans notre conversation et ajoute les photos sélectionnées.</p>
+    <button class="primary" onclick="prepareSync()">Préparer le bilan</button>
+    <textarea id="syncText" readonly></textarea>
+    <button onclick="copySync()">Copier le bilan</button>
+  </div>
+</section>
+</main>
+
+<div class="nav">
+  <button onclick="showTab('home')" id="nav-home" class="active">Accueil</button>
+  <button onclick="showTab('training')" id="nav-training">Séance</button>
+  <button onclick="showTab('food')" id="nav-food">Repas</button>
+  <button onclick="showTab('tracking')" id="nav-tracking">Suivi</button>
+</div>
+
+<script>
+const PLAN = [{"date": "2026-06-25", "label": "Thursday 25/06/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-06-26", "label": "Friday 26/06/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-06-27", "label": "Saturday 27/06/2026", "workout": "Marche rapide + gainage", "activity": "Marche", "exercises": [["Marche rapide", "1", "45-60 min", "allure 4,5 à 5,5 km/h"], ["Planche", "3", "30-60 sec", "45 sec"], ["Planche latérale", "3/côté", "30 sec", "30-45 sec"], ["Crunch câble/machine ou relevés de genoux", "3", "12-15", "45-60 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-06-28", "label": "Sunday 28/06/2026", "workout": "Épaules • Bras soft", "activity": "Salle soft", "exercises": [["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl EZ léger si coude OK", "3", "12-15", "60 sec"]], "weigh": false, "photoBody": true}, {"date": "2026-06-29", "label": "Monday 29/06/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-06-30", "label": "Tuesday 30/06/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-01", "label": "Wednesday 01/07/2026", "workout": "Repos actif", "activity": "Repos actif", "exercises": [["Marche tranquille ou mobilité", "1", "30-45 min", "facile"]], "weigh": true, "photoBody": false}, {"date": "2026-07-02", "label": "Thursday 02/07/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-03", "label": "Friday 03/07/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-04", "label": "Saturday 04/07/2026", "workout": "Marche rapide + gainage", "activity": "Marche", "exercises": [["Marche rapide", "1", "45-60 min", "allure 4,5 à 5,5 km/h"], ["Planche", "3", "30-60 sec", "45 sec"], ["Planche latérale", "3/côté", "30 sec", "30-45 sec"], ["Crunch câble/machine ou relevés de genoux", "3", "12-15", "45-60 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-07-05", "label": "Sunday 05/07/2026", "workout": "Épaules • Bras soft", "activity": "Salle soft", "exercises": [["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl EZ léger si coude OK", "3", "12-15", "60 sec"]], "weigh": false, "photoBody": true}, {"date": "2026-07-06", "label": "Monday 06/07/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-07-07", "label": "Tuesday 07/07/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-08", "label": "Wednesday 08/07/2026", "workout": "Repos actif", "activity": "Repos actif", "exercises": [["Marche tranquille ou mobilité", "1", "30-45 min", "facile"]], "weigh": true, "photoBody": false}, {"date": "2026-07-09", "label": "Thursday 09/07/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-10", "label": "Friday 10/07/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-11", "label": "Saturday 11/07/2026", "workout": "Marche rapide + gainage", "activity": "Marche", "exercises": [["Marche rapide", "1", "45-60 min", "allure 4,5 à 5,5 km/h"], ["Planche", "3", "30-60 sec", "45 sec"], ["Planche latérale", "3/côté", "30 sec", "30-45 sec"], ["Crunch câble/machine ou relevés de genoux", "3", "12-15", "45-60 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-07-12", "label": "Sunday 12/07/2026", "workout": "Épaules • Bras soft", "activity": "Salle soft", "exercises": [["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl EZ léger si coude OK", "3", "12-15", "60 sec"]], "weigh": false, "photoBody": true}, {"date": "2026-07-13", "label": "Monday 13/07/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-07-14", "label": "Tuesday 14/07/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-15", "label": "Wednesday 15/07/2026", "workout": "Repos actif", "activity": "Repos actif", "exercises": [["Marche tranquille ou mobilité", "1", "30-45 min", "facile"]], "weigh": true, "photoBody": false}, {"date": "2026-07-16", "label": "Thursday 16/07/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-17", "label": "Friday 17/07/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-18", "label": "Saturday 18/07/2026", "workout": "Marche rapide + gainage", "activity": "Marche", "exercises": [["Marche rapide", "1", "45-60 min", "allure 4,5 à 5,5 km/h"], ["Planche", "3", "30-60 sec", "45 sec"], ["Planche latérale", "3/côté", "30 sec", "30-45 sec"], ["Crunch câble/machine ou relevés de genoux", "3", "12-15", "45-60 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-07-19", "label": "Sunday 19/07/2026", "workout": "Épaules • Bras soft", "activity": "Salle soft", "exercises": [["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl EZ léger si coude OK", "3", "12-15", "60 sec"]], "weigh": false, "photoBody": true}, {"date": "2026-07-20", "label": "Monday 20/07/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-07-21", "label": "Tuesday 21/07/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-22", "label": "Wednesday 22/07/2026", "workout": "Repos actif", "activity": "Repos actif", "exercises": [["Marche tranquille ou mobilité", "1", "30-45 min", "facile"]], "weigh": true, "photoBody": false}, {"date": "2026-07-23", "label": "Thursday 23/07/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-24", "label": "Friday 24/07/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-25", "label": "Saturday 25/07/2026", "workout": "Marche rapide + gainage", "activity": "Marche", "exercises": [["Marche rapide", "1", "45-60 min", "allure 4,5 à 5,5 km/h"], ["Planche", "3", "30-60 sec", "45 sec"], ["Planche latérale", "3/côté", "30 sec", "30-45 sec"], ["Crunch câble/machine ou relevés de genoux", "3", "12-15", "45-60 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-07-26", "label": "Sunday 26/07/2026", "workout": "Épaules • Bras soft", "activity": "Salle soft", "exercises": [["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl EZ léger si coude OK", "3", "12-15", "60 sec"]], "weigh": false, "photoBody": true}, {"date": "2026-07-27", "label": "Monday 27/07/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-07-28", "label": "Tuesday 28/07/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-29", "label": "Wednesday 29/07/2026", "workout": "Repos actif", "activity": "Repos actif", "exercises": [["Marche tranquille ou mobilité", "1", "30-45 min", "facile"]], "weigh": true, "photoBody": false}, {"date": "2026-07-30", "label": "Thursday 30/07/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-07-31", "label": "Friday 31/07/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-08-01", "label": "Saturday 01/08/2026", "workout": "Marche rapide + gainage", "activity": "Marche", "exercises": [["Marche rapide", "1", "45-60 min", "allure 4,5 à 5,5 km/h"], ["Planche", "3", "30-60 sec", "45 sec"], ["Planche latérale", "3/côté", "30 sec", "30-45 sec"], ["Crunch câble/machine ou relevés de genoux", "3", "12-15", "45-60 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-08-02", "label": "Sunday 02/08/2026", "workout": "Épaules • Bras soft", "activity": "Salle soft", "exercises": [["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl EZ léger si coude OK", "3", "12-15", "60 sec"]], "weigh": false, "photoBody": true}, {"date": "2026-08-03", "label": "Monday 03/08/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-08-04", "label": "Tuesday 04/08/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-08-05", "label": "Wednesday 05/08/2026", "workout": "Repos actif", "activity": "Repos actif", "exercises": [["Marche tranquille ou mobilité", "1", "30-45 min", "facile"]], "weigh": true, "photoBody": false}, {"date": "2026-08-06", "label": "Thursday 06/08/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-08-07", "label": "Friday 07/08/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-08-08", "label": "Saturday 08/08/2026", "workout": "Marche rapide + gainage", "activity": "Marche", "exercises": [["Marche rapide", "1", "45-60 min", "allure 4,5 à 5,5 km/h"], ["Planche", "3", "30-60 sec", "45 sec"], ["Planche latérale", "3/côté", "30 sec", "30-45 sec"], ["Crunch câble/machine ou relevés de genoux", "3", "12-15", "45-60 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-08-09", "label": "Sunday 09/08/2026", "workout": "Épaules • Bras soft", "activity": "Salle soft", "exercises": [["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl EZ léger si coude OK", "3", "12-15", "60 sec"]], "weigh": false, "photoBody": true}, {"date": "2026-08-10", "label": "Monday 10/08/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-08-11", "label": "Tuesday 11/08/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-08-12", "label": "Wednesday 12/08/2026", "workout": "Repos actif", "activity": "Repos actif", "exercises": [["Marche tranquille ou mobilité", "1", "30-45 min", "facile"]], "weigh": true, "photoBody": false}, {"date": "2026-08-13", "label": "Thursday 13/08/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-08-14", "label": "Friday 14/08/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-08-15", "label": "Saturday 15/08/2026", "workout": "Marche rapide + gainage", "activity": "Marche", "exercises": [["Marche rapide", "1", "45-60 min", "allure 4,5 à 5,5 km/h"], ["Planche", "3", "30-60 sec", "45 sec"], ["Planche latérale", "3/côté", "30 sec", "30-45 sec"], ["Crunch câble/machine ou relevés de genoux", "3", "12-15", "45-60 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-08-16", "label": "Sunday 16/08/2026", "workout": "Épaules • Bras soft", "activity": "Salle soft", "exercises": [["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl EZ léger si coude OK", "3", "12-15", "60 sec"]], "weigh": false, "photoBody": true}, {"date": "2026-08-17", "label": "Monday 17/08/2026", "workout": "Pecs • Épaules • Triceps", "activity": "Salle", "exercises": [["Chest press convergente", "4", "8-12", "90 sec"], ["Développé incliné haltères", "4", "8-12", "90 sec"], ["Pec deck ou écartés", "3", "12-15", "60 sec"], ["Élévations latérales poulie", "4", "12-15", "60 sec"], ["Rear delt machine", "4", "12-15", "60 sec"], ["Extension triceps corde au-dessus de la tête", "4", "10-12", "60-90 sec"]], "weigh": true, "photoBody": false}, {"date": "2026-08-18", "label": "Tuesday 18/08/2026", "workout": "Dos • Biceps • Arrière épaules", "activity": "Salle", "exercises": [["Tirage vertical", "4", "8-12", "90 sec"], ["Rowing machine", "4", "8-12", "90 sec"], ["Tirage horizontal", "3", "10-12", "75-90 sec"], ["Rear delt machine", "3", "12-15", "60 sec"], ["Curl concentré assis", "4", "10-12", "60 sec"], ["Curl incliné haltères ou pupitre", "3", "10-12", "60-75 sec"]], "weigh": false, "photoBody": false}, {"date": "2026-08-19", "label": "Wednesday 19/08/2026", "workout": "Repos actif", "activity": "Repos actif", "exercises": [["Marche tranquille ou mobilité", "1", "30-45 min", "facile"]], "weigh": true, "photoBody": false}];
+const TODAY_OVERRIDE = "2026-06-25";
+function todayKey() {
+  // Pour démarrer ton plan au jeudi 25/06/2026 comme demandé.
+  // Plus tard, remplace par: return new Date().toISOString().slice(0,10)
+  return TODAY_OVERRIDE;
+}
+function getDay() {
+  const key = todayKey();
+  return PLAN.find(d => d.date === key) || PLAN[0];
+}
+function storeKey(k) { return "mdf_" + todayKey() + "_" + k; }
+function showTab(id) {
+  ['home','training','food','tracking','sync'].forEach(x => document.getElementById(x).classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  ['home','training','food','tracking'].forEach(x => document.getElementById('nav-'+x)?.classList.remove('active'));
+  document.getElementById('nav-'+id)?.classList.add('active');
+}
+function loadDay() {
+  const d = getDay();
+  document.getElementById('todayTitle').textContent = "Aujourd'hui — " + new Date(d.date+'T12:00:00').toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'});
+  document.getElementById('todayWorkout').textContent = d.workout;
+  document.getElementById('workoutName').textContent = d.workout + " • Durée cible : 55 à 75 min";
+  document.getElementById('weighCard').style.display = d.weigh ? 'block' : 'none';
+  document.getElementById('bodyPhotoCard').style.display = d.photoBody ? 'block' : 'none';
+  const list = document.getElementById('exerciseList');
+  list.innerHTML = '';
+  d.exercises.forEach((ex, idx) => {
+    const div = document.createElement('div');
+    div.className = 'exercise';
+    div.innerHTML = `<div class="exercise-title">${ex[0]}</div>
+      <span class="pill">${ex[1]} séries</span><span class="pill">${ex[2]}</span><span class="pill">Repos ${ex[3]}</span>
+      <input style="margin-top:10px" placeholder="Charge / ressenti (optionnel)" data-exnote="${idx}">`;
+    list.appendChild(div);
+  });
+  document.querySelectorAll('[data-check]').forEach(cb => {
+    cb.checked = localStorage.getItem(storeKey(cb.dataset.check)) === '1';
+    cb.onchange = () => { localStorage.setItem(storeKey(cb.dataset.check), cb.checked ? '1':'0'); updateScore(); };
+  });
+  document.getElementById('notes').value = localStorage.getItem(storeKey('notes')) || '';
+  document.getElementById('stepsInput').value = localStorage.getItem(storeKey('steps')) || '';
+  document.getElementById('weightInput').value = localStorage.getItem(storeKey('weight')) || '';
+  updateWater(); updateScore(); updateStepsStatus();
+}
+function updateScore() {
+  const weights = {breakfast:10,lunch:20,dinner:20,training:20,sync:10};
+  let s = 0;
+  Object.keys(weights).forEach(k => { if(localStorage.getItem(storeKey(k))==='1') s += weights[k]; });
+  const water = parseFloat(localStorage.getItem(storeKey('water')) || '0');
+  if (water >= 3) s += 10;
+  const steps = parseInt(localStorage.getItem(storeKey('steps')) || '0');
+  if (steps >= 7000) s += 10;
+  document.getElementById('score').textContent = s;
+  document.getElementById('scoreBar').style.width = s + '%';
+  document.getElementById('scoreText').textContent = s >= 85 ? "Très bonne journée. Continue comme ça." : s >= 60 ? "Journée correcte. Termine les bases." : "Pas de panique. Coche les fondamentaux.";
+}
+function addWater(v) {
+  const current = parseFloat(localStorage.getItem(storeKey('water')) || '0');
+  localStorage.setItem(storeKey('water'), (current + v).toFixed(2));
+  updateWater(); updateScore();
+}
+function resetWater() { localStorage.setItem(storeKey('water'),'0'); updateWater(); updateScore(); }
+function updateWater() {
+  const v = parseFloat(localStorage.getItem(storeKey('water')) || '0');
+  document.getElementById('waterVal').textContent = v.toFixed(2).replace('.00','');
+  document.getElementById('waterText').textContent = v >= 4 ? "Excellent" : v >= 3 ? "Validé" : "Encore " + Math.max(0, (3-v)).toFixed(2) + " L";
+}
+function saveSteps() {
+  localStorage.setItem(storeKey('steps'), document.getElementById('stepsInput').value || '0');
+  updateStepsStatus(); updateScore();
+}
+function updateStepsStatus() {
+  const s = parseInt(localStorage.getItem(storeKey('steps')) || '0');
+  const el = document.getElementById('stepsStatus');
+  if(!el) return;
+  el.textContent = s >= 7000 ? "✅ Pas validés" : "⚠️ Encore " + Math.max(0,7000-s) + " pas";
+}
+function saveWeight() {
+  localStorage.setItem(storeKey('weight'), document.getElementById('weightInput').value || '');
+  document.getElementById('weightStatus').textContent = "✅ Poids enregistré";
+}
+function saveNotes() {
+  localStorage.setItem(storeKey('notes'), document.getElementById('notes').value || '');
+  alert("Notes enregistrées");
+}
+function prepareSync() {
+  localStorage.setItem(storeKey('sync'),'1');
+  document.querySelector('[data-check="sync"]').checked = true;
+  updateScore();
+  const d = getDay();
+  const checks = ['breakfast','lunch','dinner','training','sync'].map(k => k + ': ' + (localStorage.getItem(storeKey(k))==='1'?'OK':'NON')).join('\n');
+  const water = localStorage.getItem(storeKey('water')) || '0';
+  const steps = localStorage.getItem(storeKey('steps')) || 'non indiqué';
+  const weight = localStorage.getItem(storeKey('weight')) || 'non indiqué';
+  const notes = localStorage.getItem(storeKey('notes')) || 'aucune';
+  const score = document.getElementById('score').textContent;
+  const text = `MY DREAM FIT - BILAN JOUR\nDate : ${d.date}\nSéance prévue : ${d.workout}\nScore : ${score}/100\n\nCases :\n${checks}\n\nPoids : ${weight} kg\nPas : ${steps}\nEau : ${water} L\nNotes repas : ${notes}\n\nPhotos à analyser : déjeuner/dîner/corps si jointes.\nDemande : analyse ma journée simplement et dis-moi quoi corriger demain.`;
+  document.getElementById('syncText').value = text;
+}
+function copySync() {
+  const t = document.getElementById('syncText');
+  t.select(); t.setSelectionRange(0,99999);
+  navigator.clipboard?.writeText(t.value);
+  alert("Bilan copié. Colle-le dans ChatGPT puis ajoute tes photos.");
+}
+loadDay();
+</script>
+</body>
+</html>
