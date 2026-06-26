@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>My Dream Fit V4.1</title>
+<title>My Dream Fit V4.2</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="My Dream Fit">
 <meta name="theme-color" content="#050816">
@@ -15,7 +15,7 @@ header{position:sticky;top:0;z-index:5;padding:14px 0;background:linear-gradient
 </style>
 </head>
 <body>
-<header><h1>My Dream Fit</h1><div class="sub">Anthony • Objectif 92 kg • simple, direct, quotidien</div><span class="ver">VERSION V4.1 — onglet repas à cocher</span></header>
+<header><h1>My Dream Fit</h1><div class="sub">Anthony • Objectif 92 kg • simple, direct, quotidien</div><span class="ver">VERSION V4.2 — repas + poids du jour</span></header>
 
 <section id="home">
 <div class="card"><div class="between"><div><h2 id="dateTitle"></h2><div class="muted" id="dayTitle"></div></div><div class="score"><span id="score">0</span>%</div></div><div class="progress"><div id="scoreBar" class="bar"></div></div><p class="muted" id="coachLine"></p></div>
@@ -81,6 +81,14 @@ header{position:sticky;top:0;z-index:5;padding:14px 0;background:linear-gradient
 </section>
 
 <section id="track" class="hidden">
+
+<div class="card"><h2>⚖️ Poids du jour</h2>
+<p class="muted">Indique ton poids du matin. Objectif actuel : 92 kg.</p>
+<input id="dailyWeight" type="number" step="0.1" placeholder="Ex : 99.4">
+<button class="primary" onclick="saveVal('dailyWeight')">Enregistrer le poids du jour</button>
+<p id="dailyWeightMsg"></p>
+</div>
+
 <div class="card"><h2>💧 Eau</h2><p class="muted">Objectif minimum : 3 L. Idéal : 3 à 4 L.</p><div class="between"><b><span id="waterV">0</span> L</b><span id="waterMsg" class="muted"></span></div><div class="grid"><button onclick="water(.25)">+250 ml</button><button onclick="water(.5)">+500 ml</button><button onclick="water(.75)">+750 ml</button><button onclick="water(1)">+1 L</button></div><button class="red" onclick="setWater(0)">Reset eau</button></div>
 <div class="card"><h2>🚶 Pas</h2><p class="muted">Minimum 7000. Objectif ensuite 8000-10000.</p><input id="steps" type="number" placeholder="Ex : 8350"><button class="primary" onclick="saveVal('steps')">Enregistrer</button><p id="stepsMsg"></p></div>
 </section>
@@ -107,7 +115,7 @@ function init(){
  document.getElementById("weighBox").style.display=d.weigh?"block":"none";
  document.querySelectorAll("[data-c]").forEach(cb=>{cb.checked=g(cb.dataset.c)==="1"; cb.onchange=()=>s(cb.dataset.c,cb.checked?"1":"0");});
  document.querySelectorAll("[data-food]").forEach(cb=>{cb.checked=g("food_"+cb.dataset.food)==="1"; cb.onchange=()=>s("food_"+cb.dataset.food,cb.checked?"1":"0");});
- ["weight","steps","notes"].forEach(id=>{let el=document.getElementById(id); if(el)el.value=g(id);});
+ ["weight","steps","notes","dailyWeight"].forEach(id=>{let el=document.getElementById(id); if(el)el.value=g(id);});
  document.getElementById("missedTraining").checked=g("missedTraining")==="1"; document.getElementById("missedReason").value=g("missedReason");
  document.getElementById("missedTraining").onchange=e=>s("missedTraining",e.target.checked?"1":"0");
  document.getElementById("missedReason").onchange=e=>s("missedReason",e.target.value);
@@ -115,8 +123,20 @@ function init(){
  d.exercises.forEach((e,i)=>{let done=g("exDone"+i)==="1"; let div=document.createElement("div"); div.className="ex"+(done?" done":""); div.innerHTML=`<label class="check"><input type="checkbox" ${done?"checked":""}> Exercice fait</label><b>${e[0]}</b><br><span class="pill">${e[1]} séries</span><span class="pill">${e[2]}</span><span class="pill">Repos ${e[3]}</span><input placeholder="Charge / ressenti optionnel" value="${g('ex'+i)}">`; div.querySelector("input[type=checkbox]").onchange=ev=>{localStorage.setItem(k("exDone"+i),ev.target.checked?"1":"0"); init();}; div.querySelector("input:not([type=checkbox])").onchange=ev=>s("ex"+i,ev.target.value); ex.appendChild(div);});
  basic(); score();
 }
-function basic(){waterUI();stepsUI();}
+function basic(){waterUI();stepsUI();dailyWeightUI();}
 function saveVal(id){s(id,document.getElementById(id).value);}
+function dailyWeightUI(){
+  const el = document.getElementById("dailyWeightMsg");
+  if(!el) return;
+  const v = parseFloat(g("dailyWeight") || "0");
+  if(!v){ el.innerHTML = ""; return; }
+  const target = 92;
+  const rest = Math.max(0, v - target).toFixed(1);
+  const diff = (v - target).toFixed(1);
+  el.innerHTML = v <= target
+    ? '<span class="ok">✅ Objectif atteint ou dépassé</span>'
+    : '<span class="warn">Encore ' + rest + ' kg avant 92 kg</span>';
+}
 function water(v){setWater((parseFloat(g("water")||0)+v).toFixed(2));}
 function setWater(v){s("water",v);}
 function waterUI(){let v=parseFloat(g("water")||0);document.getElementById("waterV").textContent=String(v).replace(".00","");document.getElementById("waterMsg").textContent=v>=4?"Excellent":v>=3?"Validé":"Encore "+Math.max(0,3-v).toFixed(2)+" L";}
