@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>My Dream Fit V4</title>
+<title>My Dream Fit V4.1</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="My Dream Fit">
 <meta name="theme-color" content="#050816">
@@ -15,7 +15,7 @@ header{position:sticky;top:0;z-index:5;padding:14px 0;background:linear-gradient
 </style>
 </head>
 <body>
-<header><h1>My Dream Fit</h1><div class="sub">Anthony • Objectif 92 kg • simple, direct, quotidien</div><span class="ver">VERSION V4 — date automatique</span></header>
+<header><h1>My Dream Fit</h1><div class="sub">Anthony • Objectif 92 kg • simple, direct, quotidien</div><span class="ver">VERSION V4.1 — onglet repas à cocher</span></header>
 
 <section id="home">
 <div class="card"><div class="between"><div><h2 id="dateTitle"></h2><div class="muted" id="dayTitle"></div></div><div class="score"><span id="score">0</span>%</div></div><div class="progress"><div id="scoreBar" class="bar"></div></div><p class="muted" id="coachLine"></p></div>
@@ -36,15 +36,48 @@ header{position:sticky;top:0;z-index:5;padding:14px 0;background:linear-gradient
 </section>
 
 <section id="food" class="hidden">
-<div class="card"><h2>🍽️ Plan alimentaire</h2>
-<h3>Matin</h3><ul><li>2 cafés noirs</li><li>Whey isolate</li><li>4 tranches jambon blanc OU skyr</li></ul>
-<h3>Midi supermarché</h3><ul><li>180-200 g poulet/dinde/thon/jambon</li><li>Riz micro-ondes 220 g si pratique</li><li>Salade simple : mâche, jeunes pousses, roquette, iceberg, crudités</li><li>1 skyr nature</li></ul>
-<p class="muted">Alternative riz : pommes de terre vapeur, lentilles, semoule, pâtes complètes ou pain complet.</p>
-<h3>Soir</h3><p>Protéine + légumes + féculent raisonnable. Photo si possible.</p></div>
-<div class="card"><h2>📸 Photos repas</h2><p class="muted">Prends le plat + emballage/marque/poids.</p>
-<label>Déjeuner</label><input id="lunchPhoto" type="file" accept="image/*" capture="environment">
-<label>Dîner</label><input id="dinnerPhoto" type="file" accept="image/*" capture="environment">
-<label>Notes rapides</label><textarea id="notes" placeholder="Ex : riz 220 g entier / sauce à part"></textarea><button onclick="saveVal('notes')">Enregistrer notes</button></div>
+<div class="card"><h2>🍽️ Repas — aliments à cocher</h2>
+<p class="muted">Coche uniquement ce que tu as réellement mangé. Ce sera repris dans le bilan ChatGPT.</p>
+
+<h3>Matin</h3>
+<label class="check"><input type="checkbox" data-food="matin_cafe_noir"> Café noir</label>
+<label class="check"><input type="checkbox" data-food="matin_whey"> Whey isolate</label>
+<label class="check"><input type="checkbox" data-food="matin_jambon"> Jambon blanc / blanc de dinde</label>
+<label class="check"><input type="checkbox" data-food="matin_skyr"> Skyr / fromage blanc 0%</label>
+<label class="check"><input type="checkbox" data-food="matin_oeufs"> Œufs</label>
+<label class="check"><input type="checkbox" data-food="matin_fruit"> Fruit : banane / pomme / fruits rouges</label>
+<label class="check"><input type="checkbox" data-food="matin_pain_complet"> Pain complet / wrap complet</label>
+
+<h3>Midi</h3>
+<label class="check"><input type="checkbox" data-food="midi_poulet_dinde"> Poulet / dinde 180-200 g</label>
+<label class="check"><input type="checkbox" data-food="midi_thon_saumon"> Thon / saumon / crevettes</label>
+<label class="check"><input type="checkbox" data-food="midi_jambon"> Jambon blanc / blanc de dinde</label>
+<label class="check"><input type="checkbox" data-food="midi_riz_220"> Riz micro-ondes 220 g</label>
+<label class="check"><input type="checkbox" data-food="midi_pommes_de_terre"> Pommes de terre vapeur</label>
+<label class="check"><input type="checkbox" data-food="midi_lentilles"> Lentilles / pois chiches</label>
+<label class="check"><input type="checkbox" data-food="midi_salade"> Salade : mâche, roquette, jeunes pousses, crudités</label>
+<label class="check"><input type="checkbox" data-food="midi_skyr"> Skyr nature</label>
+<label class="check"><input type="checkbox" data-food="midi_coca_zero"> Coca Zéro / eau</label>
+
+<h3>Soir</h3>
+<label class="check"><input type="checkbox" data-food="soir_viande_maigre"> Viande maigre : poulet, steak 5%, dinde</label>
+<label class="check"><input type="checkbox" data-food="soir_poisson"> Poisson / thon / saumon</label>
+<label class="check"><input type="checkbox" data-food="soir_oeufs"> Œufs / omelette</label>
+<label class="check"><input type="checkbox" data-food="soir_legumes"> Légumes / salade</label>
+<label class="check"><input type="checkbox" data-food="soir_feculent"> Féculent raisonnable : riz, pâtes, pommes de terre, pain complet</label>
+<label class="check"><input type="checkbox" data-food="soir_skyr"> Skyr / fromage blanc si faim</label>
+<label class="check"><input type="checkbox" data-food="soir_zero"> Eau / boisson zéro</label>
+
+<h3>Extras à signaler</h3>
+<label class="check"><input type="checkbox" data-food="extra_frites"> Frites / chips</label>
+<label class="check"><input type="checkbox" data-food="extra_sauce"> Sauce calorique</label>
+<label class="check"><input type="checkbox" data-food="extra_sucre"> Dessert sucré / viennoiserie</label>
+<label class="check"><input type="checkbox" data-food="extra_fastfood"> Fast-food / kebab / tacos</label>
+
+<h3>Notes repas</h3>
+<textarea id="notes" placeholder="Ex : poké medium, sauce soja sucrée, riz 220 g entier, kebab galette steak..."></textarea>
+<button onclick="saveVal('notes')">Enregistrer notes</button>
+</div>
 </section>
 
 <section id="track" class="hidden">
@@ -73,6 +106,7 @@ function init(){
  document.getElementById("trainSub").textContent=d.title+" • coche chaque exercice fait";
  document.getElementById("weighBox").style.display=d.weigh?"block":"none";
  document.querySelectorAll("[data-c]").forEach(cb=>{cb.checked=g(cb.dataset.c)==="1"; cb.onchange=()=>s(cb.dataset.c,cb.checked?"1":"0");});
+ document.querySelectorAll("[data-food]").forEach(cb=>{cb.checked=g("food_"+cb.dataset.food)==="1"; cb.onchange=()=>s("food_"+cb.dataset.food,cb.checked?"1":"0");});
  ["weight","steps","notes"].forEach(id=>{let el=document.getElementById(id); if(el)el.value=g(id);});
  document.getElementById("missedTraining").checked=g("missedTraining")==="1"; document.getElementById("missedReason").value=g("missedReason");
  document.getElementById("missedTraining").onchange=e=>s("missedTraining",e.target.checked?"1":"0");
@@ -88,6 +122,11 @@ function setWater(v){s("water",v);}
 function waterUI(){let v=parseFloat(g("water")||0);document.getElementById("waterV").textContent=String(v).replace(".00","");document.getElementById("waterMsg").textContent=v>=4?"Excellent":v>=3?"Validé":"Encore "+Math.max(0,3-v).toFixed(2)+" L";}
 function stepsUI(){let st=parseInt(g("steps")||0);document.getElementById("stepsMsg").innerHTML=st>=7000?'<span class="ok">✅ Pas validés</span>':'<span class="warn">Encore '+Math.max(0,7000-st)+' pas</span>';}
 function score(){let sc=0;if(g("breakfast")==="1")sc+=10;if(g("lunch")==="1")sc+=20;if(g("dinner")==="1")sc+=20;let d=day(),done=0;d.exercises.forEach((e,i)=>{if(g("exDone"+i)==="1")done++;});if(g("training")==="1"||done===d.exercises.length)sc+=20;if(parseFloat(g("water")||0)>=3)sc+=10;if(parseInt(g("steps")||0)>=7000)sc+=10;if(g("sync")==="1")sc+=10;if(g("missedTraining")==="1")sc=Math.max(0,sc-10);document.getElementById("score").textContent=sc;document.getElementById("scoreBar").style.width=sc+"%";document.getElementById("coachLine").textContent=sc>=85?"Très bonne journée. On répète.":sc>=60?"Correct. Termine les bases.":"Priorité aux fondamentaux.";}
+function foodSummary(){
+ const labels=[];
+ document.querySelectorAll("[data-food]").forEach(cb=>{if(g("food_"+cb.dataset.food)==="1"){labels.push(cb.parentElement.textContent.trim());}});
+ return labels.length?labels.join(", "):"aucun";
+}
 function prepare(){s("sync","1");let d=day();let doneList=d.exercises.map((e,i)=>`- ${e[0]} : ${g("exDone"+i)==="1"?"OK":"NON"} ${g("ex"+i)?"/ "+g("ex"+i):""}`).join("\n");document.getElementById("out").value=`MY DREAM FIT - BILAN\nDate : ${d.date}\nSéance prévue : ${d.title}\nScore : ${document.getElementById("score").textContent}/100\n\nPetit-déj : ${g("breakfast")==="1"?"OK":"NON"}\nDéjeuner : ${g("lunch")==="1"?"OK":"NON"}\nDîner : ${g("dinner")==="1"?"OK":"NON"}\nSport/marche : ${g("training")==="1"?"OK":"NON"}\nÉchec salle : ${g("missedTraining")==="1"?"OUI":"NON"}\nRaison : ${g("missedReason")||"aucune"}\n\nExercices :\n${doneList}\n\nPoids : ${g("weight")||"non indiqué"} kg\nPas : ${g("steps")||"non indiqué"}\nEau : ${g("water")||0} L\nNotes : ${g("notes")||"aucune"}\n\nAnalyse-moi ça simplement et dis-moi quoi corriger demain.`;}
 function copy(){let o=document.getElementById("out");o.select();navigator.clipboard?.writeText(o.value);alert("Copié.");}
 init();
